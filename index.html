@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire étendu</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-200 h-screen flex items-center justify-center">
+
+<div x-data="data()" class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+    <!-- Tout le contenu de votre formulaire ici -->
+    
+    <div class="mb-6 flex justify-between items-center">
+        <div :class="step >= 1 ? 'text-blue-500' : 'text-gray-400'">Votre situation</div>
+        <div :class="step >= 5 ? 'text-blue-500' : 'text-gray-400'">Vos finances</div>
+        <div :class="step >= 9 ? 'text-blue-500' : 'text-gray-400'">Vos infos</div>
+        <div :class="step >= 11 ? 'text-blue-500' : 'text-gray-400'">Votre bilan</div>
+    </div>
+    <div class="mb-6">
+        <div class="h-2 bg-gray-200 rounded">
+            <div :style="'width:' + (step/maxStep)*100 + '%'" class="h-2 bg-blue-500 rounded"></div>
+        </div>
+    </div>
+
+    <!-- Étape 1 : Votre situation -->
+    <div x-show="step === 1">
+        <p class="mb-4 text-gray-700">Quelle est votre situation ? 👫</p>
+        <div class="flex flex-col gap-2">
+            <button @click="situation = 'Célibataire'" :class="situation === 'Célibataire' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Célibataire</button>
+            <button @click="situation = 'Marié(e)/Pacsé(e)'" :class="situation === 'Marié(e)/Pacsé(e)' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Marié(e)/Pacsé(e)</button>
+            <button @click="situation = 'Divorcé(e)'" :class="situation === 'Divorcé(e)' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Divorcé(e)</button>
+            <button @click="situation = 'En concubinage'" :class="situation === 'En concubinage' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">En concubinage</button>
+            <button @click="situation = 'Veuf(ve)'" :class="situation === 'Veuf(ve)' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Veuf(ve)</button>
+        </div>
+    </div>
+
+    <!-- Étape 2 : Quel âge avez-vous ? -->
+    <div x-show="step === 2">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quel âge avez-vous ? 🎂</span>
+            <input x-model="age" class="mt-1 p-2 w-full border rounded-md" type="number" placeholder="Entrez votre âge">
+        </label>
+    </div>
+
+    <!-- Étape 3 : Quel est votre code postal ? -->
+    <div x-show="step === 3">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quel est votre code postal ?</span>
+            <input x-model="postalCode" @input="fetchCity()" class="mt-1 p-2 w-full border rounded-md" type="text" placeholder="Entrez votre code postal">
+        </label>
+        <div x-show="suggestedCities.length > 0" class="mt-2 border rounded-md shadow-lg bg-white">
+            <template x-for="city in suggestedCities" :key="city.postalCode">
+                <div @click="() => selectCity(city)" class="cursor-pointer hover:bg-gray-200 p-2">
+                    <span x-text="city.label"></span>
+                </div>
+            </template>
+        </div>
+      
+    </div>
+
+    <!-- Étape 4 : Quelle est votre activité ? -->
+    <div x-show="step === 4">
+        <p class="mb-4 text-gray-700">Quelle est votre activité ? 💼</p>
+        <div class="flex flex-col gap-2">
+            <button @click="activity = 'Salarié'" :class="activity === 'Salarié' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Salarié</button>
+            <button @click="activity = 'Indépendant/Chef d entreprise'" :class="activity === 'Indépendant/Chef d entreprise' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Indépendant/Chef d'entreprise</button>
+            <button @click="activity = 'Etudiant/Apprenti'" :class="activity === 'Etudiant/Apprenti' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Etudiant/Apprenti</button>
+            <button @click="activity = 'Sans activité/au chômage'" :class="activity === 'Sans activité/au chômage' ? 'bg-blue-500 text-white' : 'bg-gray-300'" class="px-4 py-2 rounded-md">Sans activité/au chômage</button>
+        </div>
+
+        <div x-show="activity === 'Indépendant/Chef d entreprise'">
+            <label class="block mb-4 mt-4">
+                <span class="text-gray-700">Quel est votre bénéfice annuel ? 💵</span>
+                <input x-model="amountAnnualBenefice" class="mt-1 p-2 w-full border rounded-md" type="text" placeholder="Réponse à la question 1">
+            </label>
+            <label class="block mb-4">
+                <span class="text-gray-700">Quel est le montant annuel de vos impôts et taxes ? 🏦</span>
+                <input x-model="amountAnnualTaxes" class="mt-1 p-2 w-full border rounded-md" type="text" placeholder="Réponse à la question 2">
+            </label>
+        </div>
+
+    </div>
+
+    <!-- Étape 5 : Quels sont vos revenus nets d'activité par mois ? -->
+    <div x-show="step === 5">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quels sont vos revenus nets d'activité par mois ? 💶</span>
+            <input x-model="netIncome" class="mt-1 p-2 w-full border rounded-md" type="number" placeholder="Entrez vos revenus">
+        </label>
+    </div>
+
+    <!-- Étape 6 : Vos revenus fonciers mensuels ? -->
+    <div x-show="step === 6">
+        <label class="block mb-4">
+            <span class="text-gray-700">Vos revenus fonciers mensuels ? 🏠</span>
+            <input x-model="propertyIncome" class="mt-1 p-2 w-full border rounded-md" type="number" placeholder="Entrez vos revenus fonciers">
+        </label>
+        <button @click="propertyIncome = 0" class="mt-2 px-4 py-2 bg-gray-300 rounded-md">Pas de revenus fonciers</button>
+    </div>
+
+    <!-- Étape 7 : Avez-vous d'autres revenus mensuels ? -->
+    <div x-show="step === 7">
+        <label class="block mb-4">
+            <span class="text-gray-700">Avez-vous d'autres revenus mensuels ? 💰</span>
+            <input x-model="otherIncome" class="mt-1 p-2 w-full border rounded-md" type="number" placeholder="Dividende, pensions, ..">
+        </label>
+        <button @click="otherIncome = 0" class="mt-2 px-4 py-2 bg-gray-300 rounded-md">Pas d'autres revenus</button>
+    </div>
+
+    <!-- Étape 8 : Quel est le montant de vos charges mensuelles ? -->
+    <div x-show="step === 8">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quel est le montant de vos charges mensuelles ? 🏦</span>
+            <input x-model="monthlyCharges" class="mt-1 p-2 w-full border rounded-md" type="number" placeholder="Taxes d'habitation, IFI, ...">
+        </label>
+    </div>
+
+    <!-- Étape 9 : Et pour finir quel est votre nom/prénom ? -->
+    <div x-show="step === 9">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quel est votre nom ? 🙍‍♂️</span>
+            <input x-model="firstName" class="mt-1 p-2 w-full border rounded-md" type="text" placeholder="Entrez votre prénom">
+        </label>
+        <label class="block mb-4">
+            <span class="text-gray-700">Quel est votre prénom ? 🙍</span>
+            <input x-model="lastName" class="mt-1 p-2 w-full border rounded-md" type="text" placeholder="Entrez votre nom">
+        </label>
+    </div>
+
+    
+
+    <!-- Étape 10 : Quelles sont vos coordonnées ? -->
+    <div x-show="step === 10">
+        <label class="block mb-4">
+            <span class="text-gray-700">Quelles sont vos coordonnées ? Pour recevoir la synthèse de votre bilan patrimonial 📫</span>
+            <input x-model="email" class="mt-1 p-2 w-full border rounded-md" type="email" placeholder="Entrez votre email">
+        </label>
+    </div>
+
+    <!-- Étape 11 : Bilan Patrimonial -->
+    <div x-show="step === 11">
+
+    <div class="flex shadow-lg p-4">
+    <!-- Left Column -->
+    <div class="left-col col-lg-7 w-1/2 border p-4 relative shadow-md">
+        <h5 class="text-center text-xl font-bold mb-4">Bilan patrimonial</h5>
+        <canvas id="myCanvas" width="300" height="300"></canvas>
+        
+        <!-- Tableau -->
+       <div class="flex justify-between mb-2">
+        <div class="flex items-center">
+            <div class="w-4 h-4 bg-yellow-400 mr-2"></div>
+            Liquidité :
+        </div>
+        <span class="liquidite-val text-right">0€</span>
+    </div>
+    <div class="flex justify-between mb-2">
+        <div class="flex items-center">
+            <div class="w-4 h-4 bg-purple-600 mr-2"></div>
+            Retraite :
+        </div>
+        <span class="retraite-val text-right">0€</span>
+    </div>
+    <div class="flex justify-between mb-2">
+        <div class="flex items-center">
+            <div class="w-4 h-4 bg-pink-500 mr-2"></div>
+            Assurance vie :
+        </div>
+        <span class="assurance-val text-right">0€</span>
+    </div>
+    <div class="flex justify-between mb-2">
+        <div class="flex items-center">
+            <div class="w-4 h-4 bg-blue-400 mr-2"></div>
+            Immobilier Locatif :
+        </div>
+        <span class="immobilier-val text-right">0€</span>
+    </div>
+    <div class="flex justify-between">
+        <strong>Total :</strong>
+        <span class="total-value text-right">0€</span>
+    </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col col-lg-5 w-1/2 ml-4 border p-4 flex flex-col justify-between shadow-md">
+        <!-- Capacité d'épargne -->
+        <div class="part1 text-center mb-4 border-b-2 border-gray-300 pb-4">
+            <h4 class="mb-2 font-semibold text-lg">Capacité d'épargne mensuelle</h4>
+            <div class="capacite-result font-bold text-blue-500 text-2xl"></div>
+        </div>
+        
+        <!-- Calculs de retraite -->
+        <div class="part2 text-center mb-4 border-b-2 border-gray-300 pb-4">
+            <h4 class="mb-2 font-semibold text-lg">D’après nos calculs vous toucherez <br>
+               <span class="pension-result font-bold text-blue-500 text-1xl"> €</span> par mois à la retraite</h4>
+        </div>
+        
+        <!-- Éligibilité -->
+        <div class="part3 text-center">
+            <h4 class="mb-2 font-semibold text-lg">Vous êtes éligible au Bilan Patrimonial !
+                Pour optimiser ou maximiser votre épargne prenez rendez-vous dès maintenant avec un de nos conseillers</h4>
+            <button class="btn rappeler mt-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">Je souhaite être rappelé</button>
+        </div>
+    </div>
+</div>
+</div>
+    
+    
+    <div x-show="alert" class="mt-4 text-red-500">Veuillez remplir tous les champs pour continuer.</div>
+    <div class="mt-6 flex justify-between">
+        <button :class="{'opacity-0 pointer-events-none': step === 1}" x-show="step !== maxStep" x-show="step !== 1 && step !== maxStep" @click="previousStep()" :disabled="step === 1" class="px-4 py-2 bg-gray-300 rounded-md">Précédent</button>
+        <button x-show="step !== maxStep" @click="validateForm()" class="px-4 py-2 bg-blue-500 text-white rounded-md">Suivant</button>
+        <button x-show="step === maxStep" class="bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm px-6 py-2 rounded-lg mt-4 float-right">
+            Retour au site
+        </button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
