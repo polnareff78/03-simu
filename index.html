@@ -3,13 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire étendu</title>
+    <title>Simulateur Bilan Patrimonial</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
 </head>
-<body class="bg-gray-200 h-screen flex items-center justify-center">
+<body>
+
+    <nav class="bg-blue-500 p-4 w-full">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-white text-lg font-semibold">Exceliass</a>
+            <a href="https://www.exceliass.fr" class="text-white">Retour au site</a>
+        </div>
+    </nav>
+<div class="bg-gray-200 h-screen flex flex-col justify-center items-center animate-gradient">
+    
 
 <div x-data="data()" class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
     <!-- Tout le contenu de votre formulaire ici -->
@@ -139,6 +149,15 @@
             <span class="text-gray-700">Quelles sont vos coordonnées ? Pour recevoir la synthèse de votre bilan patrimonial 📫</span>
             <input x-model="email" class="mt-1 p-2 w-full border rounded-md" type="email" placeholder="Entrez votre email">
         </label>
+        <div class="form-check">
+            <input class="form-check-input box" type="checkbox" value="" id="flexCheckDefault" required>
+            <label class="form-check-label text-box" for="flexCheckDefault">
+                J’accepte que les données personnelles saisies sur ce formulaire soient traitées 
+                par la société EXCELIASS conformément à la politique de confidentialité 
+                dont j’ai pris connaissance.
+            </label>
+        </div>
+        
     </div>
 
     <!-- Étape 11 : Bilan Patrimonial -->
@@ -214,12 +233,16 @@
     <div class="mt-6 flex justify-between">
         <button :class="{'opacity-0 pointer-events-none': step === 1}" x-show="step !== maxStep" x-show="step !== 1 && step !== maxStep" @click="previousStep()" :disabled="step === 1" class="px-4 py-2 bg-gray-300 rounded-md">Précédent</button>
         <button x-show="step !== maxStep" @click="validateForm()" class="px-4 py-2 bg-blue-500 text-white rounded-md">Suivant</button>
-        <button x-show="step === maxStep" class="bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm px-6 py-2 rounded-lg mt-4 float-right">
-            Retour au site
-        </button>
+        <a x-show="step == maxStep" href="https://www.exceliass.fr" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm rounded-md mt-4 float-right">Retour au site</a>
+
+        <a x-show="step == maxStep" href="https://www.exceliass.fr/reclamation" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm rounded-md mt-4 float-right">Report</a>
+
     </div>
 </div>
-
+<footer class="bg-gray-200 p-4 w-full mt-8">
+    <p class="text-center">&copy; 2023 Exceliass. Tous droits réservés.</p>
+</footer>
 <script src="script.js"></script>
+</div>
 </body>
 </html>

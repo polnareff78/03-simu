@@ -1,0 +1,22 @@
+{
+    "name": "03-simu",
+    "version": "1.0.0",
+    "description": "",
+    "main": "scrpit.js",
+    "scripts": {
+        "test": "jest"
+    },
+    "devDependencies": {
+        "@testing-library/dom": "^9.3.1",
+        "@testing-library/jest-dom": "^6.1.2",
+        "@testing-library/user-event": "^14.4.3",
+        "jest": "^29.6.4",
+        "jest-environment-jsdom": "^29.6.4"
+    },
+    "jest": {
+        "testEnvironment": "jest-environment-jsdom"
+    },
+    "dependencies": {
+        "chart.js": "^4.4.0"
+    }
+}

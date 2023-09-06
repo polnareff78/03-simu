@@ -1,3 +1,4 @@
+
 function data() {
     return {
         suggestedCities: [],
@@ -18,20 +19,24 @@ function data() {
         email: '',
         amountAnnualBenefice: '',
         amountAnnualTaxes: '',
+        // fonction validation
         validateForm() {
-            // Votre code de validation ici
             if (this.step === 1 && !this.situation) {
                     this.alert = true;
                     return;
                 }
-                if (this.step === 2 && !this.age) {
+                if (this.step === 2 && (this.age < 18 || !this.age)) {
                     this.alert = true;
+                    alert('Vous devez avoir au moins 18 ans pour continuer.');
                     return;
                 }
-                if (this.step === 3 && !this.postalCode) {
+                
+                if (this.step === 3 && (this.postalCode.length !== 5 || !this.postalCode)) {
                     this.alert = true;
+                    alert('Le code postal doit comporter exactement 5 chiffres.');
                     return;
                 }
+                
                 if (this.step === 4 && !this.activity) {
                     this.alert = true;
                     return;
@@ -56,14 +61,16 @@ function data() {
                     this.alert = true;
                     return;
                 }
-                if (this.step === 10 && !this.email) {
+                if (this.step === 10 && (!this.email || !document.getElementById('flexCheckDefault').checked)) {
                     this.alert = true;
+                    alert('Veuillez accepter les conditions de confidentialité pour continuer.');
                     return;
-                }
+                }                
 
                 if (this.step === 11) {
+                    
                     myUniqueGraphDonutFunction();
-                    console.log(myUniqueGraphDonutFunction);
+                    sendEmail(formData);
                 }
 
                  if (this.step < this.maxStep) {
@@ -88,7 +95,6 @@ function data() {
                 amountAnnualTaxes: this.amountAnnualTaxes
             };
             localStorage.setItem('formData', JSON.stringify(formData));
-            console.log(localStorage.getItem('formData'));
 
         },
         // Toutes vos autres fonctions et données AlpineJS ici
@@ -254,3 +260,69 @@ function myUniqueGraphDonutFunction() {
 $(document).ready(function() {
     myUniqueGraphDonutFunction();
 });
+
+
+function formatFormData(formData) {
+    return `
+Nom: ${formData.firstName} ${formData.lastName}
+Âge: ${formData.age}
+Code postal: ${formData.postalCode}
+Ville: ${formData.city}
+Situation: ${formData.situation}
+Activité: ${formData.activity}
+Revenu net: ${formData.netIncome}€
+Revenu immobilier: ${formData.propertyIncome}€
+Autres revenus: ${formData.otherIncome}€
+Charges mensuelles: ${formData.monthlyCharges}€
+Bénéfice annuel (si indépendant): ${formData.amountAnnualBenefice}€
+Taxes annuelles (si indépendant): ${formData.amountAnnualTaxes}€
+Email: ${formData.email}
+    `;
+}
+
+
+const BACKEND_URL = 'URL_HEROKU_APP'; // Remplacez par l'URL de votre backend sur Heroku
+
+async function sendEmail(formData) {
+    const formattedData = formatFormData(formData);
+    
+    const emailContent = `
+Les détails du formulaire sont les suivants:
+
+${formattedData}
+
+Tableau:
+Liquidité: ${formData.liquidite}€
+Retraite: ${formData.retraite}€
+Assurance vie: ${formData.assurance}€
+Immobilier Locatif: ${formData.immobilier}€
+Total: ${formData.total}€
+`;
+
+    try {
+        const response = await fetch('http://localhost:3000/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                to: "nassim.tabari@gmail.com",
+                subject: "Nouvelle soumission de formulaire",
+                text: emailContent
+            })
+        });
+
+        if (response.status === 200) {
+            console.log('Email envoyé avec succès');
+        } else {
+            console.error('Erreur lors de l\'envoi de l\'email');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi de l\'email:', error);
+    }
+    
+}
+
+module.exports = {
+    data
+};
