@@ -71,6 +71,8 @@ function data() {
                     
                     myUniqueGraphDonutFunction();
                     sendEmail(formData);
+                    localStorage.clear();
+
                 }
 
                  if (this.step < this.maxStep) {
